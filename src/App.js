@@ -8,9 +8,13 @@ import ShopPage from './pages/shop/shop.component';
 import Header from './components/header/header.component';
 import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import { auth, createUserProfileDocument } from './firebase/firebase.utils';
+import  { setCurrentUser } from './redux/user/user.actions'
+
+import { useDispatch } from 'react-redux';
+
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let unsubscribeFromAuth = null;
@@ -18,28 +22,28 @@ function App() {
       if (userAuth) {
         const userRef = await createUserProfileDocument(userAuth);
         userRef.onSnapshot(snapShot => {
-          setCurrentUser({ id: snapShot.id, ...snapShot.data() });
+          dispatch(setCurrentUser({ id: snapShot.id, ...snapShot.data() }));
         });
       }
-      setCurrentUser(userAuth);
+      dispatch(setCurrentUser(userAuth));
     });
-    console.log(currentUser);
     return function cleanup() {
       unsubscribeFromAuth();
     };
   }, []);
 
   return (
-    <Router>
-      <div>
-        <Header currentUser={currentUser} />
-        <Switch>
-          <Route exact path='/' component={HomePage} />
-          <Route path='/shop' component={ShopPage} />
-          <Route path='/signIn' component={SignInAndSignUpPage} />
-        </Switch>
-      </div>
-    </Router>
+    
+      <Router>
+        <div>
+          <Header />
+          <Switch>
+            <Route exact path='/' component={HomePage} />
+            <Route path='/shop' component={ShopPage} />
+            <Route path='/signIn' component={SignInAndSignUpPage} />
+          </Switch>
+        </div>
+      </Router>
   );
 }
 
